@@ -89,11 +89,15 @@ interval interval::subtract(interval left, interval right){
 
 
 interval interval::bitwise_and(interval left, interval right){
-    interval top = interval::top();
-    if((left == top) && (right == top)){
-        return top; //if any
-    }
-    return interval(left.getLow(), left.getHigh());
+    if ((left.getLow() < 0) &&  (right.getLow() < 0)
+    && (left.getHigh() < 0) && (right.getHigh() < 0))
+        return interval(-16, -1); //if both intervals are totally negative, then the top bit will be and'ed to 1
+
+    if ((left.getLow() >= 0) &&  (right.getLow() >= 0)
+    && (left.getHigh() >= 0) && (right.getHigh() >= 0))
+        return interval(0, 15); //if both intervals are totally non-negative, then the top bit will be and'ed to 0
+
+    return interval::top(); //"to do"
 }
 
 
@@ -160,13 +164,35 @@ void under_overflow_tests(){
     }
 }
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+void bitwise_and_test_pos_neg(){
+    // (-16,-14) & (-5, -4)
+    interval result = interval::bitwise_and(interval(-16,-14), interval(-5, -4));
+    bool cond = ((result.getLow() == -16) && (result.getHigh() == -1));
+    if(! cond){
+        std::cout << "Failed test: <(-16, -14) & (-5, -4)>.\nShould be (-16, -1), actually was (" << result.getLow() << ", " << result.getHigh() << ")\n";
+        assert(cond);
+    }
+
+    // (1, 5) & (3, 9)
+    result = interval::bitwise_and(interval(1,5), interval(3, 9));
+    cond = ((result.getLow() == 0) && (result.getHigh() == 15));
+    if(! cond){
+        std::cout << "Failed test: <(1, 5) & (3, 9)>.\nShould be (0, 15), actually was (" << result.getLow() << ", " << result.getHigh() << ")\n";
+        assert(cond);
+    }
+}
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 main()
-{   normal_tests();
+{   normal_tests();  //subtraction
     overflow_tests();
     underflow_tests();
     under_overflow_tests();
+
+    bitwise_and_test_pos_neg();
 
     std::cout << "All tests passed! \n";
 
