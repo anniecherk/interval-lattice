@@ -132,11 +132,19 @@ void normal_tests()
         assert(cond);
     }
 
+    // (2, 5) - (0, 2)
+    result = interval::subtract(interval(2, 5), interval(0, 2));
+    cond = ((result.getLow() == 0) && (result.getHigh() == 5));
+    if(! cond){
+        std::cout << "Failed test: <(2, 5) - (0, 2)>.\nShould be (0, 5), actually was (" << result.getLow() << ", " << result.getHigh() << ")\n";
+        assert(cond);
+    }
+
 }
 
 void overflow_tests(){
     // (0, 1) - (-16, -15)
-    interval result = interval::subtract(interval(0,1), interval(-16, -15));
+    interval result = interval::subtract(interval(0,1), interval(-16, -15)); //(0--16 overflows)
     bool cond = ((result.getLow() == -16) && (result.getHigh() == 15));
     if(! cond){
         std::cout << "Failed test: <(0, 1) - (-16, -15)>.\nShould be (-15, 16), actually was (" << result.getLow() << ", " << result.getHigh() << ")\n";
@@ -155,11 +163,11 @@ void underflow_tests(){
 }
 
 void under_overflow_tests(){
-    // (3,4) - (-5, -4)
-    interval result = interval::subtract(interval(3,4), interval(-5, -4));
-    bool cond = ((result.getLow() == 7) && (result.getHigh() == 9));
+    // (-16, 2) - (-15, 1)
+    interval result = interval::subtract(interval(-16, 3), interval(-15, 3)); //(-16-3 underflows, 3--15 overflows)
+    bool cond = ((result.getLow() == -16) && (result.getHigh() == 15));
     if(! cond){
-        std::cout << "Failed test: <(3, 4) - (-5, -4)>.\nShould be (7, 9), actually was (" << result.getLow() << ", " << result.getHigh() << ")\n";
+        std::cout << "Failed test: <(-16, 3) - (-15, 3)>.\nShould be (-16, 15), actually was (" << result.getLow() << ", " << result.getHigh() << ")\n";
         assert(cond);
     }
 }
