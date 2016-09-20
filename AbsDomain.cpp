@@ -56,26 +56,25 @@ interval interval::subtract(interval left, interval right){
 
     // std::all_of(std::begin(bounds), std::end(bounds), [](int a){return ((a>=-16) && (a<15));}
 
+    bool overflow = false;
+    bool underflow = false;
+
+    for ( int i = 0 ; i < 4 ; ++i ) {
+        if (bounds[i] > 15)
+            overflow = true;
+        if (bounds[i] < -16)
+            underflow = true;
+    }
 
 
-    // for ( n=0 ; n<5 ; ++n )
-    //   {
-    //     result += foo[n];
-    //   }
-
-//    if()
-
-
-
-    // if()             //no overflow
-    //     return interval(low, high);
-    //
-    // // else if (low < -16) //underflow
-    // //     low = 15 - (low + 16);
-    // // else if (high > 15)
-    // //     low = 2;
-    // else
-    return interval(left.getLow(), left.getHigh());
+    if( (overflow == false) && (underflow == false) )
+        return interval(bounds[0], bounds[1]);
+    else if( (overflow == true) && (underflow == false) ) //high is 15, low is wrapped around (lowest overflow)
+        return interval::top();
+    else if( (overflow == false) && (underflow == true) ) //low is -16, high is wrapped around (highest underflow)
+        return interval::top();
+    else //both underflow & overflow -> should grab both end points
+        return interval::top();
 }
 
 interval interval::bitwise_and(interval left, interval right){
@@ -99,7 +98,11 @@ void no_overflow_tests()
 
     interval result = interval::subtract(three_four, neg_five_neg_four);
 
-    assert((result.getLow() == 0) && (result.getHigh() == 7));
+    bool cond = ((result.getLow() == 7) && (result.getHigh() == 9));
+    if(! cond){
+        std::cout << "Failed test: <(3,4) - (-5, -4)>.\nShould be (7, 9), actually was (" << result.getLow() << ", " << result.getHigh() << ")\n";
+        assert(cond);
+    }
 
 }
 
@@ -118,7 +121,7 @@ main()
     no_overflow_tests();
     // overflow_tests();
 
-    std::cout << "done! \n";
+    std::cout << "All tests passed! \n";
 
     return 0;
 }
