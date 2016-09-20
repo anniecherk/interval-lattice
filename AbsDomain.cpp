@@ -206,8 +206,8 @@ void bitwise_and_test_pos_neg(){
 main()
 {   normal_tests();  //subtraction
     overflow_tests();
-//    underflow_tests();
-//    under_overflow_tests();
+    underflow_tests();
+    under_overflow_tests();
 
     bitwise_and_test_pos_neg();
 
